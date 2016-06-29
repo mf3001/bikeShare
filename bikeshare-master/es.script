@@ -1,0 +1,69 @@
+curl -XDELETE 'localhost:9200/bikes'
+
+curl -XPUT 'localhost:9200/bikes'
+
+curl -XPOST 'localhost:9200/bikes/_close'
+
+curl -XPUT 'localhost:9200/tweetmap/_settings' -d '{
+  "analysis": {
+    "analyzer": {
+      "case_insensitive_sort": {
+        "tokenizer": "keyword",
+        "filter":  [ "lowercase" ]
+      }
+    }
+  }
+}'
+
+curl -XPOST 'localhost:9200/tweetmap/_open'
+
+curl -XPUT 'localhost:9200/tweetmap/_mapping/tweets' -d '{
+    "tweets" : {
+        "properties" : {
+            "bike_id" : {
+				"type" : "string",
+				"index" : "not_analyzed"
+			},
+			"model" : {
+    			"type" : "multi_field",
+				"fields" : {
+					"contents" : {"type" : "string", "index" : "analyzed"},
+					"sort" : {"type" : "string", "analyzer" : "case_insensitive_sort"}
+				}
+			},
+			"details" : {
+				"type" : "multi_field",
+				"fields" : {
+					"author" : {"type" : "string", "index" : "analyzed"},
+					"untouched" : {"type" : "string", "index" : "not_analyzed"}
+				}
+			},
+			"user_id" : {
+				"type" : "string",
+				"index" : "not_analyzed"
+			},
+			"username" : {
+				"type" : "string",
+				"index" : "not_analyzed"
+			},
+			"location" : {
+				"type": "geo_point"
+			},
+			"location_name" : {
+				"type" : "multi_field",
+				"fields" : {
+					"location_name" : {"type" : "string", "index" : "analyzed"},
+					"untouched" : {"type" : "string", "index" : "not_analyzed"}
+				}
+			},
+			"price" : {
+				"type" : "string",
+				"index" : "not_analyzed"
+			},
+			"status" : {
+				"type" : "string",
+				"index" : "not_analyzed"
+			}
+        }
+    }
+}'
